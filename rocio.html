@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuestra Historia - Rocío & Yo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    /* Efecto 3D para el Sobre */
+    .perspective-1000 { perspective: 1000px; }
+    .transform-style-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; }
+    
+    .envelope-flap {
+      transform-origin: top;
+      transition: transform 0.6s ease-in-out;
+    }
+    .envelope-open .envelope-flap {
+      transform: rotateX(180deg);
+    }
+    
+    /* Transición de Fondo Suave */
+    .theme-transition {
+      transition: background 1s ease, border-color 1s ease, box-shadow 1s ease;
+    }
+
+    /* Animación Globos */
+    @keyframes float {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0.8; }
+      100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+    }
+    .balloon {
+      position: absolute;
+      bottom: -100px;
+      width: 35px;
+      height: 45px;
+      border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+      animation: float 9s linear infinite;
+    }
+  </style>
+</head>
+<body id="main-body" class="bg-gradient-to-br from-pink-200 via-rose-100 to-pink-300 min-h-screen flex flex-col items-center justify-center relative overflow-hidden font-sans theme-transition">
+
+  <div id="balloons-container" class="absolute inset-0 pointer-events-none overflow-hidden z-0"></div>
+  <canvas id="fireworks-canvas" class="absolute inset-0 pointer-events-none z-50"></canvas>
+
+  <header class="text-center z-10 my-4 px-4">
+    <h1 id="main-title" class="text-3xl md:text-5xl font-extrabold text-pink-700 drop-shadow-md transition-all duration-500">
+      8 Años Inolvidables ❤️
+    </h1>
+    <p id="sub-title" class="text-md md:text-lg text-pink-600 font-medium mt-1">Haz clic en la carta para abrir nuestro primer recuerdo</p>
+  </header>
+
+  <main class="z-10 w-full max-w-lg p-4 perspective-1000">
+    <div id="stage-card" class="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-6 border-4 border-pink-300 text-center theme-transition relative min-h-[480px] flex flex-col justify-between items-center">
+      
+      <div id="stage-content" class="w-full flex flex-col items-center my-auto">
+        
+        <div id="envelope-wrapper" class="relative w-64 h-44 bg-pink-400 rounded-b-xl shadow-xl flex items-center justify-center cursor-pointer my-6 transform transition-transform hover:scale-105">
+          <div class="absolute inset-0 bg-pink-500 rounded-b-xl"></div>
+          
+          <div id="letter-preview" class="absolute w-56 h-36 bg-white rounded-lg shadow-inner transition-all duration-700 transform translate-y-0 flex flex-col items-center justify-center p-2 border border-pink-200">
+            <span class="text-2xl">💌</span>
+            <span class="text-xs font-bold text-pink-600 mt-1">8 Años de Amor</span>
+          </div>
+
+          <div id="flap" class="envelope-flap absolute top-0 left-0 w-0 h-0 border-l-[128px] border-l-transparent border-r-[128px] border-r-transparent border-t-[90px] border-t-pink-600 z-20"></div>
+          
+          <div class="absolute bottom-0 left-0 w-0 h-0 border-l-[128px] border-l-pink-300 border-r-[128px] border-r-pink-300 border-b-[85px] border-b-pink-400 z-20 rounded-b-xl pointer-events-none"></div>
+        </div>
+
+        <div id="media-container" class="hidden w-full flex-col items-center animate-fade-in">
+          <div id="photo-frame" class="relative w-full h-64 mb-4 rounded-2xl overflow-hidden border-4 border-white shadow-lg">
+            <img id="stage-image" src="" alt="Momento Especial" class="w-full h-full object-cover">
+          </div>
+          <div class="bg-white/80 p-4 rounded-xl border border-gray-200 shadow-sm w-full">
+            <p id="stage-text" class="text-gray-800 text-md md:text-lg italic font-medium leading-relaxed"></p>
+          </div>
+        </div>
+
+      </div>
+
+      <button id="next-btn" class="hidden mt-4 bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all transform hover:scale-105 z-30">
+        Continuar el viaje ✨
+      </button>
+
+    </div>
+  </main>
+
+  <script>
+    // Configuración de las 4 Transiciones Únicas
+    const transitions = [
+      {
+        id: 'carta',
+        title: '¡Felices 8 Años, Rocío!',
+        subtitle: 'Un sobre rosado lleno de recuerdos...',
+        img: 'foto1.jpg',
+        text: 'Ocho años caminando juntos, riendo, aprendiendo y construyendo este amor tan único. Gracias por ser mi compañera de vida perfecta.',
+        bodyBg: 'linear-gradient(135deg, #fbcfe8 0%, #f43f5e 100%)',
+        cardBorder: '#f472b6',
+        btnBg: '#db2777'
+      },
+      {
+        id: 'machupicchu',
+        title: 'Misterio & Magia en Machu Picchu 🏔️',
+        subtitle: 'Tocando las nubes juntos',
+        img: 'foto2.jpg',
+        text: 'Entre montañas sagradas y energía mística, Machu Picchu fue testigo de que no hay cumbre ni desafío que no podamos conquistar si estamos tomados de la mano.',
+        bodyBg: 'linear-gradient(135deg, #d97706 0%, #065f46 100%)',
+        cardBorder: '#10b981',
+        btnBg: '#059669'
+      },
+      {
+        id: 'rio',
+        title: 'Sol, Mar & Alegría en Río 🏖️',
+        subtitle: 'Samba, calidez y amor infinito',
+        img: 'foto3.jpg',
+        text: 'El calor de Río de Janeiro, las caminatas por la playa y tu sonrisa iluminando cada rincón. Momentos dorados grabados para siempre en la memoria.',
+        bodyBg: 'linear-gradient(135deg, #fef08a 0%, #0284c7 100%)',
+        cardBorder: '#38bdf8',
+        btnBg: '#0284c7'
+      },
+      {
+        id: 'ofelia',
+        title: 'Nuestra Familia con Ofelia 🐾',
+        subtitle: 'El hogar que construimos día a día',
+        img: 'foto4.jpg',
+        text: 'Nuestro viaje más hermoso es el que vivimos cada día en casa. Ofelia completó nuestro hogar trayendo aún más ternura y alegría a nuestras vidas.',
+        bodyBg: 'linear-gradient(135deg, #fed7aa 0%, #f43f5e 100%)',
+        cardBorder: '#fb923c',
+        btnBg: '#ea580c'
+      }
+    ];
+
+    let currentStep = 0;
+    let envelopeOpened = false;
+
+    // Elementos DOM
+    const body = document.getElementById('main-body');
+    const mainTitle = document.getElementById('main-title');
+    const subTitle = document.getElementById('sub-title');
+    const stageCard = document.getElementById('stage-card');
+    const envelopeWrapper = document.getElementById('envelope-wrapper');
+    const flap = document.getElementById('flap');
+    const letterPreview = document.getElementById('letter-preview');
+    const mediaContainer = document.getElementById('media-container');
+    const stageImage = document.getElementById('stage-image');
+    const stageText = document.getElementById('stage-text');
+    const nextBtn = document.getElementById('next-btn');
+
+    // Apertura Animada del Sobre
+    envelopeWrapper.addEventListener('click', () => {
+      if (envelopeOpened) return;
+      envelopeOpened = true;
+
+      // Animación solapa abriéndose
+      flap.style.transform = 'rotateX(180deg)';
+      
+      // La carta se desplaza hacia arriba
+      setTimeout(() => {
+        letterPreview.style.transform = 'translateY(-80px)';
+      }, 300);
+
+      // Desvanecer sobre y desplegar contenido completo
+      setTimeout(() => {
+        envelopeWrapper.classList.add('hidden');
+        showStageContent(0);
+        triggerConfetti();
+      }, 1000);
+    });
+
+    // Cambiar de Escena
+    function showStageContent(index) {
+      const data = transitions[index];
+
+      // Cambiar Temática Visual (Fondo y Colores)
+      body.style.background = data.bodyBg;
+      stageCard.style.borderColor = data.cardBorder;
+      nextBtn.style.backgroundColor = data.btnBg;
+
+      // Textos principales
+      mainTitle.textContent = data.title;
+      subTitle.textContent = data.subtitle;
+
+      // Cargar Imagen y Texto
+      stageImage.src = data.img;
+      stageText.textContent = data.text;
+
+      // Mostrar contenedor
+      mediaContainer.classList.remove('hidden');
+      mediaContainer.classList.add('flex');
+      nextBtn.classList.remove('hidden');
+
+      if (index === transitions.length - 1) {
+        nextBtn.textContent = "¡Celebrar 8 Años! 🎉";
+      } else {
+        nextBtn.textContent = "Siguiente Recuerdo ✨";
+      }
+    }
+
+    // Botón Siguiente
+    nextBtn.addEventListener('click', () => {
+      currentStep++;
+
+      if (currentStep < transitions.length) {
+        triggerConfetti();
+        showStageContent(currentStep);
+      } else {
+        // Pirotecnia Final
+        triggerFireworks();
+        mainTitle.textContent = "¡Te Amo Rocío! ❤️";
+        subTitle.textContent = "Por una vida entera juntos";
+        nextBtn.textContent = "Revivir Experiencia 🔄";
+        currentStep = -1; // Reiniciar al siguiente clic
+      }
+    });
+
+    // Efectos de Confeti
+    function triggerConfetti() {
+      confetti({ particleCount: 50, spread: 70, origin: { y: 0.7 } });
+    }
+
+    function triggerFireworks() {
+      const duration = 3 * 1000;
+      const end = Date.now() + duration;
+
+      (function frame() {
+        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
+    }
+
+    // Generar Globos
+    (function createBalloons() {
+      const container = document.getElementById('balloons-container');
+      const colors = ['rgba(255,255,255,0.6)', 'rgba(244,114,182,0.6)', 'rgba(251,146,60,0.6)'];
+      for (let i = 0; i < 12; i++) {
+        const balloon = document.createElement('div');
+        balloon.className = 'balloon';
+        balloon.style.left = `${Math.random() * 100}%`;
+        balloon.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        balloon.style.animationDelay = `${Math.random() * 6}s`;
+        container.appendChild(balloon);
+      }
+    })();
+  </script>
+</body>
+</html>

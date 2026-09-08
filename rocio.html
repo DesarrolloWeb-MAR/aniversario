@@ -71,8 +71,10 @@
         </div>
 
         <div id="media-container" class="hidden w-full flex-col items-center animate-fade-in">
-          <div id="photo-frame" class="relative w-full h-64 mb-4 rounded-2xl overflow-hidden border-4 border-white shadow-lg">
-            <img id="stage-image" src="" alt="Momento Especial" class="w-full h-full object-cover">
+          <!-- Modificado: Fondo negro/translúcido y altura auto-ajustable -->
+          <div id="photo-frame" class="relative w-full h-72 mb-4 rounded-2xl overflow-hidden border-4 border-white shadow-lg bg-black/5 flex items-center justify-center">
+            <!-- Modificado: 'object-contain' muestra la imagen 100% entera sin recortar -->
+            <img id="stage-image" src="" alt="Momento Especial" class="w-full h-full object-contain">
           </div>
           <div class="bg-white/80 p-4 rounded-xl border border-gray-200 shadow-sm w-full">
             <p id="stage-text" class="text-gray-800 text-md md:text-lg italic font-medium leading-relaxed"></p>
@@ -154,15 +156,12 @@
       if (envelopeOpened) return;
       envelopeOpened = true;
 
-      // Animación solapa abriéndose
       flap.style.transform = 'rotateX(180deg)';
       
-      // La carta se desplaza hacia arriba
       setTimeout(() => {
         letterPreview.style.transform = 'translateY(-80px)';
       }, 300);
 
-      // Desvanecer sobre y desplegar contenido completo
       setTimeout(() => {
         envelopeWrapper.classList.add('hidden');
         showStageContent(0);
@@ -174,20 +173,16 @@
     function showStageContent(index) {
       const data = transitions[index];
 
-      // Cambiar Temática Visual (Fondo y Colores)
       body.style.background = data.bodyBg;
       stageCard.style.borderColor = data.cardBorder;
       nextBtn.style.backgroundColor = data.btnBg;
 
-      // Textos principales
       mainTitle.textContent = data.title;
       subTitle.textContent = data.subtitle;
 
-      // Cargar Imagen y Texto
       stageImage.src = data.img;
       stageText.textContent = data.text;
 
-      // Mostrar contenedor
       mediaContainer.classList.remove('hidden');
       mediaContainer.classList.add('flex');
       nextBtn.classList.remove('hidden');
@@ -207,16 +202,14 @@
         triggerConfetti();
         showStageContent(currentStep);
       } else {
-        // Pirotecnia Final
         triggerFireworks();
         mainTitle.textContent = "¡Te Amo Rocío! ❤️";
         subTitle.textContent = "Por una vida entera juntos";
         nextBtn.textContent = "Revivir Experiencia 🔄";
-        currentStep = -1; // Reiniciar al siguiente clic
+        currentStep = -1;
       }
     });
 
-    // Efectos de Confeti
     function triggerConfetti() {
       confetti({ particleCount: 50, spread: 70, origin: { y: 0.7 } });
     }
@@ -232,7 +225,6 @@
       })();
     }
 
-    // Generar Globos
     (function createBalloons() {
       const container = document.getElementById('balloons-container');
       const colors = ['rgba(255,255,255,0.6)', 'rgba(244,114,182,0.6)', 'rgba(251,146,60,0.6)'];
